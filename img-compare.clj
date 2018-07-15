@@ -1,6 +1,7 @@
 (require '[clj-http.client :as client])
 (use 'clojure.pprint)
 
+;; ------------------------------------------------------------------------------------------------------------- 
 ;; ------------------------------------------------- FUNCTIONS ------------------------------------------------- 
 ;; ------------------------------------------------------------------------------------------------------------- 
 
@@ -82,20 +83,6 @@
   "Given a list of links, this function returns a map with the links as keys and their phashes as values."
   [img-links]
   (into {} ;; Transform the seq from the next expression into a Clojure map.
-        ;; ----------------------------------------------------------------------------------------------------------------------------
-        ;; NOTE: At this point in the program we reach a crossroads. We know that get-all-images starts all requests concurrently,
-        ;; but we have two ways of processing the requests from there:
-        ;; On one hand we could use "map" to go through each request one at a time and do the following:
-        ;; 1. Join the request's thread. 2. Compute the requested image's phash.
-        ;; This approach requires more time, as it is sequential (it takes ~23 min. to process 1700 imgur pics),
-        ;; but it consumes a very reasonable amount of CPU and RAM.
-        ;; On the other hand we could use "pmap" which will attempt to do the above two steps concurrently.
-        ;; This approach is definitely faster (it takes ~12 min. to process 1700 imgur pics),
-        ;; but it has trade-offs when it comes to CPU and RAM usage:
-        ;; The problem with "pmap" is that it will attempt to join all threads at once (which will take CPU and RAM).
-        ;; It will also attempt to compute the phashes simultaneously (which will take CPU and RAM).
-        ;; So basically, you could use "map", which is slower but consumes less resources OR "pmap", which is faster, but more costly.
-        ;; ----------------------------------------------------------------------------------------------------------------------------
         (map-indexed ;; This will TRANSFORM the seq of links and img-streams (promises) from get-all-images, INTO a seq of links and phashes.
           (fn [idx pair]
             [(first pair)
@@ -121,6 +108,7 @@
            rest-without-similar (apply dissoc tail similar)]
        (recur rest-without-similar (conj acc [(first head) similar]))))))
 
+;; ------------------------------------------------------------------------------------------------------------- 
 ;; ---------------------------------------------------- MAIN ---------------------------------------------------
 ;; ------------------------------------------------------------------------------------------------------------- 
 
